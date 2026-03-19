@@ -16,14 +16,16 @@ using (GamesContext context = contextFactory.CreateDbContext(args)){
     Console.WriteLine("-----Приклад неявного (implicit) завантаження------");
     //// 2
     var cities = context.Cities
-        .Include(t => t.Country).Where(t => t.CountryId == 1);
+        //.Include(t => t.Country)
+        .Where(t => t.CountryId == 1)
+        .ToList();
     foreach (var city in cities)
         Console.WriteLine($"{city.Name}, {city.Country.Name}");
 }
 using (GamesContext context1 = contextFactory.CreateDbContext(args)) {
     Console.WriteLine("-----Приклад явного (explicit) завантаження------");
     City kyivCity = await context1.Cities.FirstAsync(t => t.Name == "Київ");
-    await  context1.Entry(kyivCity).Reference(t => t.Country).LoadAsync();
+    //await  context1.Entry(kyivCity).Reference(t => t.Country).LoadAsync();
     Console.WriteLine($"{kyivCity.Name} {kyivCity.Country.Name}");
 }
 
