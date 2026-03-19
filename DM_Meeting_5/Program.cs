@@ -23,8 +23,15 @@ using (GamesContext context = contextFactory.CreateDbContext(args)){
 using (GamesContext context1 = contextFactory.CreateDbContext(args)) {
     Console.WriteLine("-----Приклад явного (explicit) завантаження------");
     City kyivCity = await context1.Cities.FirstAsync(t => t.Name == "Київ");
-    await  context1.Entry(kyivCity).Reference(t => t.Country).LoadAsync();
-    Console.WriteLine($"{kyivCity.Name} {kyivCity.Country.Name}");
+    await  context1.Entry(kyivCity)
+        .Reference(t => t.Country)
+        .LoadAsync();
+    await context1.Entry(kyivCity)
+        .Collection(t => t.Studios)
+        .LoadAsync();
+    Console.WriteLine($"Студії в м. {kyivCity.Name} {kyivCity.Country.Name}");
+    foreach (Studio studio in kyivCity.Studios)
+        Console.WriteLine($"{studio.Name}");
 }
 
 async Task SeedCounties(GamesContext context)
