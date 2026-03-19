@@ -4,35 +4,37 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using DM_Meeting_5.Models;
+using Microsoft.Data.SqlClient;
 
 Console.OutputEncoding = Encoding.UTF8;
 GamesContextFactory contextFactory = new GamesContextFactory();
-using (GamesContext context = contextFactory.CreateDbContext(args)){
-    //// 1
-    //var cities =  await context.Cities
-    //    .Include(t => t.Country).ToListAsync();
-    //cities = cities.Where(t => t.CountryId == 1).ToList();
+using GamesContext context = contextFactory.CreateDbContext(args);
+var someCities = context.Cities.Where(c => c.Name.Contains("Лі"));
+foreach (var c in someCities)
+    Console.WriteLine($"{c.Name}");
+Console.WriteLine("---------");
+string pattern = "%і%";
+//SqlParameter sqlParameter1 = new SqlParameter("@cityNamePattern", System.Data.SqlDbType.NVarChar);
+//sqlParameter1.Value = pattern;
+//IQueryable<City> cities = context.Cities.FromSqlRaw("SELECT * FROM Cities WHERE Name LIKE @cityNamePattern;", sqlParameter1);
+//IQueryable<City> cities = context.Cities.FromSqlRaw($"SELECT * FROM Cities WHERE Name LIKE {pattern}");
+IQueryable<City> cities = context.Cities.FromSqlInterpolated($"SELECT * FROM Cities WHERE Name LIKE {pattern}")
+    .Take(2)
+    .OrderByDescending(t=>t.Name);
+foreach (var c in cities)
+    Console.WriteLine($"{c.Name}");
 
-    Console.WriteLine("-----Приклад неявного (implicit) завантаження------");
-    //// 2
-    var cities = context.Cities
-        .Include(t => t.Country).Where(t => t.CountryId == 1);
-    foreach (var city in cities)
-        Console.WriteLine($"{city.Name}, {city.Country.Name}");
-}
-using (GamesContext context1 = contextFactory.CreateDbContext(args)) {
-    Console.WriteLine("-----Приклад явного (explicit) завантаження------");
-    City kyivCity = await context1.Cities.FirstAsync(t => t.Name == "Київ");
-    await  context1.Entry(kyivCity)
-        .Reference(t => t.Country)
-        .LoadAsync();
-    await context1.Entry(kyivCity)
-        .Collection(t => t.Studios)
-        .LoadAsync();
-    Console.WriteLine($"Студії в м. {kyivCity.Name} {kyivCity.Country.Name}");
-    foreach (Studio studio in kyivCity.Studios)
-        Console.WriteLine($"{studio.Name}");
-}
+//SqlParameter sqlParameter2 = new SqlParameter("@cityName", System.Data.SqlDbType.NVarChar);
+//sqlParameter2.Value = "Польща";
+//int rows = await context.Database.ExecuteSqlRawAsync("INSERT INTO Countries VALUES(@cityName)", sqlParameter2);
+//Console.WriteLine($"{rows} added!");
+Console.WriteLine("----Stored Procedure example-------");
+SqlParameter studioNameParam = new SqlParameter("@sName", System.Data.SqlDbType.NVarChar);
+studioNameParam.Value = "Playrix";
+var games = context.Games.FromSqlRaw("EXEC getGamesByStudioName @sName", studioNameParam);
+foreach (Game game in games)
+    Console.WriteLine($"{game.Title}, {game.GameStyle}");
+
 
 async Task SeedCounties(GamesContext context)
 {
@@ -108,5 +110,37 @@ async Task SeedData(GamesContext context)
     catch (Exception ex)
     {
         Console.WriteLine(ex.Message);
+    }
+}
+
+async Task LoadingExamples()
+{
+    using (GamesContext context = contextFactory.CreateDbContext(args))
+    {
+        //// 1
+        //var cities =  await context.Cities
+        //    .Include(t => t.Country).ToListAsync();
+        //cities = cities.Where(t => t.CountryId == 1).ToList();
+
+        Console.WriteLine("-----Приклад неявного (implicit) завантаження------");
+        //// 2
+        var cities = context.Cities
+            .Include(t => t.Country).Where(t => t.CountryId == 1);
+        foreach (var city in cities)
+            Console.WriteLine($"{city.Name}, {city.Country.Name}");
+    }
+    using (GamesContext context1 = contextFactory.CreateDbContext(args))
+    {
+        Console.WriteLine("-----Приклад явного (explicit) завантаження------");
+        City kyivCity = await context1.Cities.FirstAsync(t => t.Name == "Київ");
+        await context1.Entry(kyivCity)
+            .Reference(t => t.Country)
+            .LoadAsync();
+        await context1.Entry(kyivCity)
+            .Collection(t => t.Studios)
+            .LoadAsync();
+        Console.WriteLine($"Студії в м. {kyivCity.Name} {kyivCity.Country.Name}");
+        foreach (Studio studio in kyivCity.Studios)
+            Console.WriteLine($"{studio.Name}");
     }
 }
