@@ -12,9 +12,9 @@ namespace DM_Meeting_5.Models
 
         public string Name { get; set; } = default!;
 
-        public ICollection<City> Cities { get; set; } = new List<City>();
+        public virtual ICollection<City> Cities { get; set; } = new List<City>();
 
-        public ICollection<Game> Games { get; set; } = new List<Game>();
+        public virtual ICollection<Game> Games { get; set; } = new List<Game>();
 
     }
 }

@@ -14,7 +14,7 @@ namespace DM_Meeting_5.Models
 
         public int StudioId { get; set; }
 
-        public Studio Studio { get; set; } = default!;
+        public virtual Studio Studio { get; set; } = default!;
 
         public GameStyle GameStyle { get; set; }
     }

@@ -14,8 +14,8 @@ namespace DM_Meeting_5.Models
 
         public int CountryId { get; set; }
 
-        public Country Country { get; set; } = default!;
+        public virtual Country Country { get; set; } = default!;
 
-        public ICollection<Studio> Studios { get; set; } = new List<Studio>();
+        public virtual ICollection<Studio> Studios { get; set; } = new List<Studio>();
     }
 }

@@ -22,6 +22,7 @@ namespace DM_Meeting_5.Data
             string connStr = configurationRoot.GetConnectionString("Default") ??
                 throw new InvalidOperationException("You should provide default connection string!");
             optionsBuilder.UseSqlServer(connStr);
+            optionsBuilder.UseLazyLoadingProxies(true);
             optionsBuilder.LogTo(str=>Debug.WriteLine(str));
             DbContextOptions<GamesContext> options = optionsBuilder.Options;
             GamesContext gamesContext = new GamesContext(options);
