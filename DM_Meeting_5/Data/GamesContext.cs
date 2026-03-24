@@ -25,6 +25,15 @@ namespace DM_Meeting_5.Data
 
         public DbSet<GameFullInfo> GameFullInfos { get; set; }
 
+        public int GetGamesQuantityByStyle(GameStyle style) => 
+            throw new NotSupportedException();
+
+        public double GetAverageGamesQuantity()=>
+            throw new NotSupportedException();
+
+        public IQueryable<GamesQuantityDTO> GetGamesQuantityByStudio()=>
+            FromExpression(()=>GetGamesQuantityByStudio());
+
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseSqlServer("");
@@ -36,6 +45,14 @@ namespace DM_Meeting_5.Data
             modelBuilder.Entity<GameFullInfo>()
                 .HasNoKey()
                 .ToView("GameFullInfo");
+            modelBuilder.Entity<GamesQuantityDTO>().
+                HasNoKey();
+            modelBuilder.HasDbFunction(typeof(GamesContext).GetMethod(nameof(GetGamesQuantityByStyle), [typeof(GameStyle)]))
+                .HasName("getGamesQuantityByStyle");
+            modelBuilder.HasDbFunction(() => GetAverageGamesQuantity())
+                .HasName("getAverageGamesQuantity");
+            modelBuilder.HasDbFunction(() => GetGamesQuantityByStudio())
+                .HasName("getGamesQuantityByStudio");
         }
     }
 }

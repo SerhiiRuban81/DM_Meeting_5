@@ -71,7 +71,31 @@ foreach(var game in gamesDetails)
     Console.WriteLine($"{game.Id}. {game.Title}. Style:{game.GameStyle}. Studio: {game.Studio}");
 }
 
+var groups = context.Games.GroupBy(t => t.StudioId)
+    .Where(g => g.Count() > context.GetAverageGamesQuantity());
+foreach(var group in groups)
+{
+    Console.WriteLine($"Назва студії: {group.Key}");
+    foreach(var game in group)
+    {
+        Console.WriteLine($"{game.Title} StudioId: {game.StudioId}");
+    }
+    Console.WriteLine("-----------");
+}
 
+///////////////////////////
+//////------------Робота з UDF------------
+//int singlePersonGameCount = context.GetGamesQuantityByStyle(GameStyle.SinglePerson);
+//int multiPlayersGameCount = context.GetGamesQuantityByStyle(GameStyle.MultiPerson);
+//Console.WriteLine($"Single Person COunt: {singlePersonGameCount}");
+//Console.WriteLine($"Multi Player Games Count: {multiPlayersGameCount}");
+//double avg = context.GetAverageGamesQuantity();
+//Console.WriteLine($"Agerage games: {avg}");
+var gamesQuantityDetails = context.GetGamesQuantityByStudio();
+foreach(var details in gamesQuantityDetails)
+{
+    Console.WriteLine($"Студія {details.Name} випускає {details.GamesQuantity} ігор");
+}
 async Task SeedCounties(GamesContext context)
 {
     if (!context.Countries.Any())
