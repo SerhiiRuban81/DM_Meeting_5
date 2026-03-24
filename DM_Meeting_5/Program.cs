@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using DM_Meeting_5.Models;
 using Microsoft.Data.SqlClient;
+using DM_Meeting_5.Models.DTOs;
 
 Console.OutputEncoding = Encoding.UTF8;
 GamesContextFactory contextFactory = new GamesContextFactory();
@@ -34,6 +35,41 @@ studioNameParam.Value = "Playrix";
 var games = context.Games.FromSqlRaw("EXEC getGamesByStudioName @sName", studioNameParam);
 foreach (Game game in games)
     Console.WriteLine($"{game.Title}, {game.GameStyle}");
+/////////////////////////////////////////////////////////
+Console.WriteLine("------------");
+var studiosByCountries = context
+    .Set<StudiosByCountry>()
+    .FromSqlRaw("EXEC getStudiosQuantityByCountry");
+    //.AsEnumerable()
+    //.Where(t=>t.Name == "Україна");
+foreach(var item in studiosByCountries)
+{
+    Console.WriteLine($"Кількість студій в {item.Name}: {item.StudiosCount}");
+}
+
+SqlParameter nameParam1 = new SqlParameter("@countryName", System.Data.SqlDbType.NVarChar);
+nameParam1.Value = "Норвегія";
+SqlParameter rowIdParam = new SqlParameter
+{
+    ParameterName = "@rowId",
+    SqlDbType = System.Data.SqlDbType.Int,
+    Direction = System.Data.ParameterDirection.Output
+};
+//await context.Database.ExecuteSqlRawAsync ("EXEC sp_addCountry @countryName, @rowId OUTPUT", nameParam1, rowIdParam);
+//Console.WriteLine($"Додано нову країну {nameParam1.Value} з Id: {rowIdParam.Value}");
+///////////////////////////
+//////------------Робота з представленнями------------
+
+var gamesDetails = context.GameFullInfos
+    .Where(t => t.GameStyle == GameStyle.MultiPerson)
+    .OrderBy(t => t.Studio)
+    //.Skip(2)
+    //.Take(4)
+    ;
+foreach(var game in gamesDetails)
+{
+    Console.WriteLine($"{game.Id}. {game.Title}. Style:{game.GameStyle}. Studio: {game.Studio}");
+}
 
 
 async Task SeedCounties(GamesContext context)

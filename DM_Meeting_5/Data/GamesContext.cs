@@ -1,4 +1,5 @@
 ﻿using DM_Meeting_5.Models;
+using DM_Meeting_5.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -22,9 +23,19 @@ namespace DM_Meeting_5.Data
 
         public DbSet<Game> Games { get; set; }
 
+        public DbSet<GameFullInfo> GameFullInfos { get; set; }
+
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder.UseSqlServer("");
         //}
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StudiosByCountry>().HasNoKey();
+            modelBuilder.Entity<GameFullInfo>()
+                .HasNoKey()
+                .ToView("GameFullInfo");
+        }
     }
 }
